@@ -1,0 +1,19 @@
+doctype 5
+html
+  head
+    title Chat Test
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    .chat Chat Log
+      hr
+    form.form
+      | user: 
+      input(type='text', name='user')
+      br
+      | text: 
+      input(type='text', name='text')
+      br
+      button(type='button') Send
+    script(type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js')
+    script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='/javascripts/chat.js')

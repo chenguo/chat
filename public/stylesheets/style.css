@@ -1,0 +1,22 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  textalign:
+}
+
+a {
+  color: #00B7FF;
+}
+
+.chat {
+    width:50%;
+    margin:10% 25%;
+    padding:2em;
+    border:4px solid black;
+}
+
+.form {
+    width: 50%;
+    margin: 0% 25%;
+    text-align:center;
+}
