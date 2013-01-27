@@ -6,15 +6,18 @@
         io = io.listen(server);
 
         var users = {};
+        var nUsers = 0;
 
         // Connection
         io.sockets.on('connection', function(socket) {
             // Send welcome message
-            socket.emit('welcome', { msg: 'Connected to server' });
+            socket.emit('welcome', { msg: 'Connected to server',
+                                     online: nUsers });
 
             // Enter chat notice
             socket.on('id', function(data) {
-                console.log("User " + data.user + " joined");
+                data.online = nUsers;
+
                 // If user has a pending timeout, then user
                 // was very recently logged on. Cancel the
                 // timeout and don't issue an "enter" message.
@@ -24,8 +27,13 @@
                 }
                 else
                 {
+                    nUsers++;
+                    data.online++;
                     socket.broadcast.emit('enter', data);
+                    console.log("User " + data.user + " joined. "
+                                + nUsers + " user(s) online.");
                 }
+                socket.emit('accepted', data);
                 socket.set('name', data.user);
                 delete(users[data.user]);
             });
@@ -50,9 +58,13 @@
                     if (!users[name])
                     {
                         var discMsg = function() {
-                            var data = { user: name };
+                            nUsers--;
+                            var data = { user: name, online: nUsers };
                             socket.broadcast.emit('disconnect', data);
-                            delete users[data.user];
+
+                            delete users[name];
+                            console.log("User " + name + " left. "
+                                        + nUsers + " user(s) online.");
                         };
                         users[name] = setTimeout(discMsg, 5000);
                     }
