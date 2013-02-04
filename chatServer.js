@@ -54,47 +54,45 @@
 
     // Handle ID message.
     var msgID = function (data, socket) {
-        socket.get('addr', function (err, addr) {
-            var key = addr + ':' + data.user;
+        var key = data.user;
 
-            console.log('ID: ' + key);
+        console.log('ID: ' + key);
 
-            // If this is new log on, initialize.
-            if (users.hasOwnProperty(key) === false)
+        // If this is new log on, initialize.
+        if (users.hasOwnProperty(key) === false)
+        {
+            users.nUsers++;
+            users[key] = { name: data.user,
+                           instances: 0 };
+
+            // Acknowledge ID message.
+            data.online = users.nUsers;
+            socket.broadcast.emit('enter', data);
+
+            console.log('New connection: ' + users.nUsers + ' users');
+        }
+        // Record of previous log on exists.
+        else
+        {
+            // If user has a pending timeout, then user
+            // was very recently logged on. Cancel the
+            // timeout and don't issue an "enter" message.
+            if (users[key].hasOwnProperty('timeout'))
             {
-                users.nUsers++;
-                users[key] = { name: data.user,
-                               instances: 0 };
-
-                // Acknowledge ID message.
-                data.online = users.nUsers;
-                socket.broadcast.emit('enter', data);
-
-                console.log('New connection: ' + users.nUsers + ' users');
+                clearTimeout(users[key].timeout)
+                delete users[key].timeout;
+                console.log('Reconnection');
             }
-            // Record of previous log on exists.
             else
             {
-                // If user has a pending timeout, then user
-                // was very recently logged on. Cancel the
-                // timeout and don't issue an "enter" message.
-                if (users[key].hasOwnProperty('timeout'))
-                {
-                    clearTimeout(users[key].timeout)
-                    delete users[key].timeout;
-                    console.log('Reconnection');
-                }
-                else
-                {
-                    console.log('Duplicate logon');
-                }
+                console.log('Duplicate logon');
             }
+        }
 
-            data.online = users.nUsers;
-            socket.emit('accepted', data);
-            socket.set('key', key);
-            incrInstance(key);
-        });
+        data.online = users.nUsers;
+        socket.emit('accepted', data);
+        socket.set('key', key);
+        incrInstance(key);
     };
 
     // Handle disconnect message
