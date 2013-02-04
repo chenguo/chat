@@ -79,8 +79,6 @@
             // timeout and don't issue an "enter" message.
             if (users[key].hasOwnProperty('timeout'))
             {
-                clearTimeout(users[key].timeout)
-                delete users[key].timeout;
                 console.log('Reconnection');
             }
             else
@@ -100,23 +98,20 @@
         socket.get('key', function(err, key) {
             // If no disconnect message is pending
             // send it after 5 seconds.
-            if (!users[key].hasOwnProperty('timeout'))
-            {
-                var cb = function() {
+            var cb = function() {
+                delete users[key].timeout;
+                if (decrInstance(key) == 0)
+                {
+                    users.nUsers--;
                     socket.broadcast.emit('disconnect',
                                           { user: users[key].name,
                                             online: users.nUsers });
-                    delete users[key].timeout;
-                    if (decrInstance(key) == 0)
-                    {
-                        delete users[key];
-                        users.nUsers--;
-                        console.log("User " + key + " left. "
-                                    + users.nUsers + " user(s) online.");
-                    }
-                };
-                users[key].timeout = setTimeout(cb, 5000);
-            }
+                    delete users[key];
+                    console.log("User " + key + " left. "
+                                + users.nUsers + " user(s) online.");
+                }
+            };
+            users[key].timeout = setTimeout(cb, 5000);
         });
     };
 
